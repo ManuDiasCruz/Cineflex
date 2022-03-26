@@ -32,14 +32,16 @@ export default function Seat(){
     
 
     function reserveSeat(event){
-        event.preserveDefault();
+        console.log("Reservando assentos...")
+        event.preventDefault();
         const promise = axios.post(postURL, {
             ids: selectedSeats,
             name: name,
             cpf: cpf
         });
-        promise.then(response =>
-            navigate("/sucesso"));
+        promise.then(response => {
+            console.log("Sucesso");
+            navigate("/sucesso"); });
         promise.catch(error => console.log("Algo deu errado meu chapa!"));
     }
 
@@ -51,18 +53,28 @@ export default function Seat(){
                     seats.map( seat => {
                         const {id, name, isAvailable} = seat;
                         return (
-                            <SeatSpot availability={isAvailable?0:1} 
-                                onClick={() => {
-                                    if (isAvailable){
-                                        setSelectedSeats([...selectedSeats, id]);
-                                        isAvailable = 2;
-                                    }else{
-                                        alert("Esse assento não está disponível");
-                                    }
-                                }}>    
+                            isAvailable ?
+                            
+                            <SeatSpot availability={selectedSeats.includes(id)?2:0} 
+                                onClick={() => 
+                                    selectedSeats.includes(id)?
+                                    setSelectedSeats(() => {
+                                        let seatsAux = selectedSeats;
+                                        seatsAux.splice(selectedSeats.indexOf(id),1);
+                                        return [...seatsAux];
+                                    })
+                                    :
+                                    setSelectedSeats([...selectedSeats, id])
+                                }>    
                                 {id}
                                 {console.log("Os assentos selecionados são: "+selectedSeats)}
                             </SeatSpot>
+                            :
+                            <SeatSpot availability={1} 
+                                onClick={() => alert("Esse assento não está disponível")}>
+                                {id}
+                            </SeatSpot>
+
                         )
                     })
                 }
@@ -192,9 +204,8 @@ const Subtitle = styled.div`
 const SubItem = styled.div`
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center; 
-    margin: 27px;
+    align-items: left;
+    margin: 15px;
 `;
 
 const Button = styled.button`

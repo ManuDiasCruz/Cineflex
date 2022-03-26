@@ -8,7 +8,7 @@ export default function Session(){
 
     const {movieId} = useParams(); //Used to match between the user selection and a object
     const [sessions, setSessions] = useState("");
-    console.log(`Renderizei SESSION com movieId = ${movieId}`);
+    
 
     useEffect(() => {
         console.log("SESSION: ativando efeitos");
@@ -16,7 +16,7 @@ export default function Session(){
         promise.then(response => {
             const {data} = response;
             console.log("SESSION: terminei a requisição à API", data);
-            setSessions(data.days);
+            setSessions(data);
         });
     }, []);
 
@@ -24,7 +24,7 @@ export default function Session(){
         <SessionMain>
             <Title2>Renderizei a SESSION{console.log(movieId.tittle)}</Title2>
             {
-                sessions.map( session => {
+                sessions.days.map( session => {
                     const {id, weekday, date, showtimes} = session;
                     return (
                         <SessionInfo>
@@ -41,9 +41,6 @@ export default function Session(){
                                     })
                                 }
                             </Hours>
-                            <Footer>
-                                <Title2>{movieId.tittle}</Title2>
-                            </Footer>
                         </SessionInfo>
                     )
                 })
