@@ -1,0 +1,21 @@
+/* estilos gerais da aplicação */
+
+* {
+  box-sizing: border-box;
+  --body-color: #FFFFFF;/*cor-fundo*/
+  --button-color: #E8833A;
+  --black: #293845; /*preto*/
+}
+
+body {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--body-color);
+  color: var(--black);
+  font-family: 'Roboto', sans-serif;
+  font-weight: 400;
+  /* font-family: 'Righteous', cursive; */
+}
