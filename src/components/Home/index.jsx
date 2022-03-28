@@ -3,7 +3,11 @@ import {Link} from "react-router-dom";
 import axios from "axios";
 import styled from "styled-components";
 
-export default function Menu(){
+import Title2 from "../CSSStyles/Title2";
+import Main from "../CSSStyles/Main";
+import MovieBanner from "../CSSStyles/MovieBanner";
+
+export default function Home(){
 
     const [movies, setMovies] = useState([]);
     console.log("Renderizei MENU");
@@ -20,37 +24,29 @@ export default function Menu(){
     }, []);
 
     return movies.length>0 ? (
-        <MenuMain>
+        <Main fullscreen={true}>
             <Title2>Selecione o filme</Title2>
             <MoviesList>
                 {
                     movies.map( movie => {
                         const {id, title, posterURL, overview, releaseDate} = movie;
                         return (
-                            <Movie imagePath={posterURL}>
+                            <MovieBanner imagePath={posterURL}>
                                 <Link to={`/sessoes/${id}`}>
                                     <img src={posterURL} alt={title} />
                                 </Link>
-                            </Movie>
+                            </MovieBanner>
                         )
                     })
                 }
             </MoviesList>
-        </MenuMain>
+        </Main>
         ):(
-        <MenuMain>
-            <Title2>Carregando lista de filmes...</Title2>
-        </MenuMain>
+        <Main>
+            <span>Carregando lista de filmes...</span>
+        </Main>
         );
 }
-
-const MenuMain = styled.main`
-    width: 100vw;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-`;
 
 const MoviesList = styled.section`
     width: 100vw;
@@ -58,38 +54,4 @@ const MoviesList = styled.section`
     flex-direction: row;
     flex-wrap: wrap;
     justify-content: center;
-`;
-
-const Movie = styled.article`
-    width: 145px;
-    height: 210px;
-    background: #FFFFFF;
-    box-shadow: 0px 2px 4px 2px rgba(0, 0, 0, 0.1);
-    border-radius: 3px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 15px;
-
-    img{
-        width: 130px;
-        height: 195px;
-        background: url(${props => props.imagePath});
-    }
-`;
-
-const Title2 = styled.h2`
-    width: 100vw;
-    height: 100px;
-    margin-top: 120px;
-    margin-bottom: 0px;
-    font-family: 'Roboto';
-    font-style: normal;
-    font-weight: 400;
-    font-size: 24px;
-    line-height: 60px;
-    text-align: center;
-    letter-spacing: 0.04em;
-
-    color: #293845;
 `;

@@ -1,14 +1,20 @@
 import { useState, useEffect } from "react";
-import {useParams, Link} from "react-router-dom";
+import {useParams, Link, useNavigate} from "react-router-dom";
 import axios from "axios";
 import styled from "styled-components";
+
+import Backpage from "../CSSStyles/Backpage";
+import Main from "../CSSStyles/Main"
+import Title2 from "../CSSStyles/Title2";
+import Button from "../CSSStyles/Button";
+import Footer from "../Footer";
 
 
 export default function Session(){
 
     const {movieId} = useParams(); //Used to match between the user selection and a object
-    const [sessions, setSessions] = useState("");
-    
+    const [sessions, setSessions] = useState(0);
+    const navigate = useNavigate();
 
     useEffect(() => {
         console.log("SESSION: ativando efeitos");
@@ -19,52 +25,51 @@ export default function Session(){
             setSessions(data);
         });
     }, []);
-
-    return sessions.length > 0 ? (
-        <SessionMain>
-            <Title2>Renderizei a SESSION{console.log(movieId.tittle)}</Title2>
-            {
-                sessions.days.map( session => {
-                    const {id, weekday, date, showtimes} = session;
-                    return (
-                        <SessionInfo>
-                            <Date> {weekday} - {date} </Date>
-                            <Hours>
-                                {
-                                    showtimes.map( showtime => {
-                                        const {name, id} = showtime;
-                                        return (
-                                            <Link to={`/assentos/${id}`}>
-                                                <Button>{name}</Button>
-                                            </Link>
-                                        )
-                                    })
-                                }
-                            </Hours>
-                        </SessionInfo>
-                    )
-                })
-            }
-        </SessionMain>
+    console.log(sessions.length);
+    return sessions !== 0 ? (
+        <>
+            <Backpage><ion-icon onClick={() => navigate("/")} name="chevron-back"></ion-icon></Backpage>
+            <Main>
+                <Title2>Selecione o horário</Title2>
+                {
+                    sessions.days.map( session => {
+                        console.log(session);
+                        const {id, weekday, date, showtimes} = session;
+                        return (
+                            <SessionInfo>
+                                <Date> {weekday} - {date} </Date>
+                                <Hours>
+                                    {
+                                        showtimes.map( showtime => {
+                                            const {name, id} = showtime;
+                                            return (
+                                                <Link to={`/assentos/${id}`}>
+                                                    <Button width={"82px"}>{name}</Button>
+                                                </Link>
+                                            )
+                                        })
+                                    }
+                                </Hours>
+                            </SessionInfo>
+                        )
+                    })
+                }
+                <Footer title={sessions.title} posterURL={sessions.posterURL} date={""} hour={""}></Footer>
+            </Main>
+        </>
         ):(
-        <SessionMain>
-            <Title2>Carregando lista de sessões...</Title2>
-        </SessionMain>
+        <>
+            <Backpage><ion-icon onClick={() => navigate("/")} name="chevron-back"></ion-icon></Backpage>
+            <Main>
+                <Title2>Carregando lista de sessões...</Title2>
+            </Main>
+        </>
         );
 }
 
-const SessionMain = styled.section`
-    width: 100vw;
-    overflow: scroll;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-`;
-
 const SessionInfo = styled.article`
-    width: 100vw;
-    height: 150px;
+    width: 400px;
+    height: 88px;
 `;
 
 const Date = styled.h3`
@@ -87,71 +92,7 @@ const Hours = styled.div`
     flex-direction: row;
     align-items: center;
     justify-content: flex-start;
-`;
-
-const Button = styled.button`
-    background: #E8833A;
-    border-radius: 3px;
-    font-family: 'Roboto';
-    font-style: normal;
-    font-weight: 400;
-    font-size: 18px;
-    line-height: 21px;
-
-    display: flex;
-    align-items: center;
-    text-align: center;
-    letter-spacing: 0.02em;
     margin-left: 24px;
-
-    color: #FFFFFF;
-`;
-
-const Title2 = styled.h2`
-    width: 100vw;
-    height: 100px;
-    margin-top: 120px;
-    margin-bottom: 0px;
-    font-family: 'Roboto';
-    font-style: normal;
-    font-weight: 400;
-    font-size: 24px;
-    line-height: 60px;
-    text-align: center;
-    letter-spacing: 0.04em;
-
-    color: #293845;
-`;
-
-const Footer = styled.footer`
-    width: 100vw;
-    height: 117px;
-    left: 0px;
-    right: 0px;
-    bottom: 0px;
-    position: fixed;
-
-    background: #DFE6ED;
-    border: 1px solid #9EADBA;
-
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: left;
-`;
-
-const MovieTitle = styled.h3`
-    font-family: 'Roboto';
-    font-style: normal;
-    font-weight: 400;
-    font-size: 26px;
-    line-height: 30px;
-    display: flex;
-    align-items: center;
-
-    position: relative;
-
-    color: #293845;
 `;
 
 

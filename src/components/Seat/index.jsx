@@ -1,12 +1,19 @@
 import { useState, useEffect } from "react";
-import {useParams, Link, Navigate, useNavigate} from "react-router-dom";
+import {useParams, useNavigate} from "react-router-dom";
 import axios from "axios";
 import styled from "styled-components";
 
-export default function Seat(){
+import Backpage from "../CSSStyles/Backpage";
+import Main from "../CSSStyles/Main";
+import Title2 from "../CSSStyles/Title2";
+import Button from "../CSSStyles/Button";
+import Footer from "../Footer";
+
+
+export default function Seat({getOrderData}){
 
     const {sessionId} = useParams(); //Used to match between the user selection and a object
-    const [seats, setSeats] = useState([""]);
+    const [sessionSeats, setSessionSeats] = useState([]);
     const [availability, setAvailability] = useState(0);
 
     const [selectedSeats, setSelectedSeats] = useState([]);
@@ -17,134 +24,133 @@ export default function Seat(){
     const navigate = useNavigate();
     console.log(`Renderizei SEATS com sessionId = ${sessionId}`);
 
+    /** Load the sessions seats list 
+        (it is used just the first time that the page is loaded). */
     useEffect(() => {
         console.log("SEATS: ativando efeitos");
         const promise = axios.get(`https://mock-api.driven.com.br/api/v5/cineflex/showtimes/${sessionId}/seats`);
         promise.then(response => {
             const {data} = response;
             console.log("SEATS: terminei a requisição à API", data);
-            setSeats(data.seats);
+            setSessionSeats(data);
         });
     }, []);
 
-    console.log(seats);
-
-    
-
+    /** Make the user movie ticket order, in two steps:
+        1. Execute a POST for the API Server with the required data;
+        2. Call Success Page to show the order details.*/
     function reserveSeat(event){
         console.log("Reservando assentos...")
         event.preventDefault();
-        const promise = axios.post(postURL, {
+        const promise = axios.post(postURL, { //Send the data to the API Server
             ids: selectedSeats,
             name: name,
             cpf: cpf
         });
+
         promise.then(response => {
             console.log("Sucesso");
-            navigate("/sucesso"); });
+            navigate("/sucesso"); }); //Load the Success Page
         promise.catch(error => console.log("Algo deu errado meu chapa!"));
     }
 
-    return seats.length > 0 ? (
-        <Container>
-            <Title2>Selecione o(s) assento(s)</Title2>
-            <SeatsMatrix>
-                {   
-                    seats.map( seat => {
-                        const {id, name, isAvailable} = seat;
-                        return (
-                            isAvailable ?
-                            
-                            <SeatSpot availability={selectedSeats.includes(id)?2:0} 
-                                onClick={() => 
-                                    selectedSeats.includes(id)?
-                                    setSelectedSeats(() => {
-                                        let seatsAux = selectedSeats;
-                                        seatsAux.splice(selectedSeats.indexOf(id),1);
-                                        return [...seatsAux];
-                                    })
-                                    :
-                                    setSelectedSeats([...selectedSeats, id])
-                                }>    
-                                {id}
-                                {console.log("Os assentos selecionados são: "+selectedSeats)}
-                            </SeatSpot>
-                            :
-                            <SeatSpot availability={1} 
-                                onClick={() => alert("Esse assento não está disponível")}>
-                                {id}
-                            </SeatSpot>
+    /** Main execution*/
+    return sessionSeats.length !== 0 ? (
+        <>
+            <Backpage><ion-icon onClick={() => navigate(`/sessoes/${sessionSeats.movie.id}`)} name="chevron-back"></ion-icon></Backpage>
+            <Main>
+                <Title2>Selecione o(s) assento(s)</Title2>
+                <SeatsMatrix>
+                    {   
+                        sessionSeats.seats.map( seat => {
+                            const {id, name, isAvailable} = seat;
+                            return (
+                                isAvailable ?
+                                
+                                <SeatSpot availability={selectedSeats.includes(id)?2:0} 
+                                    onClick={() => 
+                                        selectedSeats.includes(id)?
+                                        setSelectedSeats(() => {
+                                            let seatsAux = selectedSeats;
+                                            seatsAux.splice(selectedSeats.indexOf(id),1);
+                                            return [...seatsAux];
+                                        })
+                                        :
+                                        setSelectedSeats([...selectedSeats, id])
+                                    }>    
+                                    {id}
+                                    {console.log("Os assentos selecionados são: "+selectedSeats)}
+                                </SeatSpot>
+                                :
+                                <SeatSpot availability={1} 
+                                    onClick={() => alert("Esse assento não está disponível")}>
+                                    {id}
+                                </SeatSpot>
 
-                        )
-                    })
-                }
-            </SeatsMatrix>
-            <Subtitle>
-                <SubItem>
-                    <SeatSpot availability={2}></SeatSpot>
-                    <p>Selecionado</p>
-                </SubItem>
-                <SubItem>
-                    <SeatSpot availability={0}></SeatSpot>
-                    <p>Disponível</p>
-                </SubItem>
-                <SubItem>
-                    <SeatSpot availability={1}></SeatSpot>
-                    <p>Indisponível</p>
-                </SubItem>
-            </Subtitle>
-            <form onSubmit={reserveSeat}>
-                <SubItem>
-                    <p>Nome do comprador:</p>
+                            )
+                        })
+                    }
+                </SeatsMatrix>
+                <Section>
+                    <Article>
+                        <SeatSpot availability={2}></SeatSpot>
+                        <p>Selecionado</p>
+                    </Article>
+                    <Article>
+                        <SeatSpot availability={0}></SeatSpot>
+                        <p>Disponível</p>
+                    </Article>
+                    <Article>
+                        <SeatSpot availability={1}></SeatSpot>
+                        <p>Indisponível</p>
+                    </Article>
+                </Section>
+                <form onSubmit={reserveSeat}>
+                    <label>Nome do comprador:</label>
                     <input type="text" 
                         placeholder="Digite seu nome..." 
                         onChange={(event)=>setName(event.target.value)}
                         value={name}
                         required/>
                     {console.log(name)}
-                </SubItem>
-                <SubItem>
-                    <p>CPF do comprador:</p>
+                    <label>CPF do comprador:</label>
                     <input type="text" 
                         placeholder="Digite seu CPF..."
+                        minLength={11}
+                        maxLength={11}
                         onChange={(event)=>setCPF(event.target.value)}
                         value={cpf}
                         required/>
                     {console.log(cpf)}
-                </SubItem>
-                <Button type="submit">Reservar assento(s)</Button>
-            </form>
-        </Container>
+                    <Button width={"100%"} type="submit" 
+                            onClick={() => {
+                                const order = {
+                                    title: sessionSeats.movie.title, 
+                                    date: sessionSeats.day.date, 
+                                    time: sessionSeats.name, 
+                                    imagePath: sessionSeats.movie.posterURL, 
+                                    seats: selectedSeats, 
+                                    buyer: name, 
+                                    buyerId: cpf,
+                                    sessionId: sessionId};
+                                getOrderData(order);
+                                }
+                                }>
+                        Reservar assento(s)
+                    </Button>
+                </form>
+                <Footer title={sessionSeats.movie.title} posterURL={sessionSeats.movie.posterURL} date={sessionSeats.day.date} hour={sessionSeats.name}></Footer>
+            </Main>
+        </>
     ):(
-    <Container>
-        <Title2>Carregando assentos...</Title2>
-    </Container>
+        <>
+            <Backpage><ion-icon onClick={() => navigate(`/sessoes/${sessionSeats.movie.id}`)} name="chevron-back"></ion-icon></Backpage>
+            <Main>
+                <Title2>Carregando assentos...</Title2>
+            </Main>
+        </>
     );
 }
-
-const Container = styled.main`
-    width: 100vw;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-`;
-
-const Title2 = styled.h2`
-    width: 100vw;
-    height: 100px;
-    margin-top: 120px;
-    margin-bottom: 0px;
-    font-family: 'Roboto';
-    font-style: normal;
-    font-weight: 400;
-    font-size: 24px;
-    line-height: 60px;
-    text-align: center;
-    letter-spacing: 0.04em;
-
-    color: #293845;
-`;
 
 const SeatsMatrix = styled.section`
     max-width: 400px;
@@ -169,29 +175,23 @@ const SeatSpot = styled.article`
     box-sizing: border-box;
     border-radius: 12px;
 
-    font-family: 'Roboto';
-    font-style: normal;
-    font-weight: 400;
-    font-size: 11px;
+    font-size: 10px;
     line-height: 13px;
     display: flex;
     align-items: center;
     text-align: center;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.005em;
 
     color: #000000;
 `;
 
-const Subtitle = styled.div`
+const Section = styled.section`
     width: 100vw;
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: center; 
 
-    font-family: 'Roboto';
-    font-style: normal;
-    font-weight: 400;
     font-size: 13px;
     line-height: 15px;
     display: flex;
@@ -201,44 +201,10 @@ const Subtitle = styled.div`
     color: #4E5A65;
 `;
 
-const SubItem = styled.div`
+const Article = styled.article`
     display: flex;
     flex-direction: column;
-    align-items: left;
+    align-items: center;
+    justify-content: center;
     margin: 15px;
-`;
-
-const Button = styled.button`
-    background: #E8833A;
-    border-radius: 3px;
-    font-family: 'Roboto';
-    font-style: normal;
-    font-weight: 400;
-    font-size: 18px;
-    line-height: 21px;
-
-    display: flex;
-    align-items: center;
-    text-align: center;
-    letter-spacing: 0.02em;
-    margin-left: 24px;
-
-    color: #FFFFFF;
-`;
-
-const Footer = styled.footer`
-    width: 100vw;
-    height: 117px;
-    left: 0px;
-    right: 0px;
-    bottom: 0px;
-    position: fixed;
-
-    background: #DFE6ED;
-    border: 1px solid #9EADBA;
-
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: left;
 `;
